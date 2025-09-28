@@ -1,2 +1,2 @@
 # DyMoDreamer
-Code for "DyMoDreamer: World Modeling with Dynamic Modulation"
+Implementation of "DyMoDreamer: World Modeling with Dynamic Modulation"

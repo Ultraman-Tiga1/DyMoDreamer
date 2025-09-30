@@ -38,7 +38,7 @@ class DeepMindLabyrinth(object):
         mode,
         action_repeat=4,
         render_size=(64, 64),
-        action_set=ACTION_SET_DEFAULT,
+        action_set=ACTION_SET_DEFAULT,#episodic=True,
         level_cache=None,
         seed=None,
         runfiles_path=None,
@@ -55,7 +55,7 @@ class DeepMindLabyrinth(object):
             self._config["allowHoldOutLevels"] = "true"
             self._config["mixerSeed"] = 0x600D5EED
         self._action_repeat = action_repeat
-        self._random = np.random.RandomState(seed)
+        self._random = np.random.RandomState(seed) 
         self._env = deepmind_lab.Lab(
             level="contributed/dmlab30/" + level,
             observations=["RGB_INTERLEAVED"],
@@ -65,6 +65,8 @@ class DeepMindLabyrinth(object):
         self._action_set = action_set
         self._last_image = None
         self._done = True
+        self.reward_range = (-float('inf'), float('inf'))
+        self.metadata = {}
 
     @property
     def observation_space(self):
@@ -78,15 +80,18 @@ class DeepMindLabyrinth(object):
 
     def reset(self):
         self._done = False
-        self._env.reset(seed=self._random.randint(0, 2**31 - 1))
-        obs = self._get_obs()
+        self._env.reset(seed=0)#self._random.randint(0, 2**31 - 1)
+        #obs = self._get_obs() 
+        obs  = self._get_obs(is_first=True) 
         return obs
 
     def step(self, action):
         raw_action = np.array(self._action_set[action], np.intc)
         reward = self._env.step(raw_action, num_steps=self._action_repeat)
-        self._done = not self._env.is_running()
-        obs = self._get_obs()
+        
+        #obs = self._get_obs()
+        obs = self._get_obs(is_last=self._done) 
+        self._done = not self._env.is_running() 
         return obs, reward, self._done, {}
 
     def render(self, *args, **kwargs):
@@ -99,10 +104,10 @@ class DeepMindLabyrinth(object):
     def close(self):
         self._env.close()
 
-    def _get_obs(self):
+    def _get_obs(self, is_first=False, is_last=False, is_terminal=False):
         if self._done:
             image = 0 * self._last_image
         else:
             image = self._env.observations()["RGB_INTERLEAVED"]
         self._last_image = image
-        return {"image": image}
+        return {"image": image, "is_terminal": is_terminal, "is_first": is_first}

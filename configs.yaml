@@ -1,8 +1,10 @@
 defaults:
+
   traindir: null
   evaldir: null
   offline_traindir: ''
   offline_evaldir: ''
+
   deterministic_run: False
   steps: 1e6
   parallel: False
@@ -10,6 +12,7 @@ defaults:
   eval_episode_num: 10
   log_every: 1e4
   reset_every: 0
+  #device: 'cuda:3'
   compile: True
   precision: 32
   debug: False
@@ -40,11 +43,15 @@ defaults:
   units: 512
   act: 'SiLU'
   norm: True
+  self_attention:
+    {img_size: 64, patch_size: 4, in_channels: 3, head_dim: 8}
   encoder:
     {mlp_keys: '$^', cnn_keys: 'image', act: 'SiLU', norm: True, cnn_depth: 32, kernel_size: 4, minres: 4, mlp_layers: 5, mlp_units: 1024, symlog_inputs: True}
   dynamic_encoder:
     {mlp_keys: '$^', cnn_keys: 'image', act: 'SiLU', norm: True, cnn_depth: 32, kernel_size: 4, minres: 4, mlp_layers: 5, mlp_units: 1024, symlog_inputs: True}
   decoder:
+    {mlp_keys: '$^', cnn_keys: 'image', act: 'SiLU', norm: True, cnn_depth: 32, kernel_size: 4, minres: 4, mlp_layers: 5, mlp_units: 1024, cnn_sigmoid: False, image_dist: mse, vector_dist: symlog_mse, outscale: 1.0}
+  dynamic_decoder:
     {mlp_keys: '$^', cnn_keys: 'image', act: 'SiLU', norm: True, cnn_depth: 32, kernel_size: 4, minres: 4, mlp_layers: 5, mlp_units: 1024, cnn_sigmoid: False, image_dist: mse, vector_dist: symlog_mse, outscale: 1.0}
 
   actor:
@@ -72,7 +79,7 @@ defaults:
   model_lr: 1e-4
   opt_eps: 1e-8
   grad_clip: 1000
-  dataset_size: 100000
+  dataset_size: 1000000
   opt: 'adam'
 
   # Behavior.
@@ -113,10 +120,13 @@ dmc_vision:
   video_pred_log: true
   encoder: {mlp_keys: '$^', cnn_keys: 'image'}
   decoder: {mlp_keys: '$^', cnn_keys: 'image'}
+  dynamic_encoder: {mlp_keys: '$^', cnn_keys: 'image'}
+  dynamic_decoder: {mlp_keys: '$^', cnn_keys: 'image'}
+
 
 crafter:
   task: crafter_reward
-  step: 1e6
+  steps: 1e6
   action_repeat: 1
   envs: 1
   train_ratio: 512
@@ -147,6 +157,24 @@ atari100k:
   resize: opencv
   actions: needed
   time_limit: 108000
+
+
+deepmind_lab: 
+  steps: 1e8
+  action_repeat: 4
+  envs: 1
+  train_ratio: 32
+  video_pred_log: true
+  dyn_hidden: 1536
+  dyn_deter: 12288
+  units: 1536
+  modulator_dyn_discrete: 96 
+  dyn_discrete: 96
+  actor: {layers: 5, dist: 'onehot', std: 'none'}
+  value: {layers: 5}
+  reward_head: {layers: 5}
+  cont_head: {layers: 5}
+  imag_gradient: 'reinforce'
 
 minecraft:
   task: minecraft_diamond

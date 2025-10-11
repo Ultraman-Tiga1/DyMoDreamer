@@ -157,27 +157,7 @@ atari100k:
   resize: opencv
   actions: needed
   time_limit: 108000
-
-
-deepmind_lab: 
-  steps: 1e8
-  action_repeat: 4
-  envs: 1
-  train_ratio: 64
-  video_pred_log: true
-  dyn_hidden: 1536
-  dyn_deter: 12288
-  units: 1536
-  modulator_dyn_discrete: 96 
-  dyn_discrete: 96
-  encoder: {mlp_keys: '$^', cnn_keys: 'image', cnn_depth: 96, mlp_layers: 5, mlp_units: 1024}
-  decoder: {mlp_keys: '$^', cnn_keys: 'image', cnn_depth: 96, mlp_layers: 5, mlp_units: 1024}
-  actor: {layers: 5, dist: 'onehot', std: 'none'}
-  value: {layers: 5}
-  reward_head: {layers: 5}
-  cont_head: {layers: 5}
-  imag_gradient: 'reinforce'
-
+ 
 minecraft:
   task: minecraft_diamond
   step: 1e8
